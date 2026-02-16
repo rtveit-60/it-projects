@@ -1,0 +1,20 @@
+# Python bytecode (prevents compiled files from bloating the repo)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables (CRITICAL: keeps sensitive keys/secrets out of Git)
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Flask/Development specific
+instance/
+.pytest_cache/
+.flaskenv
+
+# OS generated files
+.DS_Store
+Thumbs.db
