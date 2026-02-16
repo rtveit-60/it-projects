@@ -63,9 +63,16 @@ The dashboard is designed to look like a premium physical monitoring interface:
 | `index.html` | **The Face** | Jinja2 template using Tailwind CSS and the "3D Glass" custom styles. |
 | `requirements.txt` | **The Toolbox** | Python dependencies (Flask, Requests, Feedparser). |
 
-Data Separation Rule: > - Static metadata (On-Call names, coverage hours, Admin URLs) MUST reside in data.py.
+## Data Formats
 
+Data Separation Rule: > - Static metadata (On-Call names, coverage hours, Admin URLs) MUST reside in data.py.
 index.html should only contain the logic for rendering these variables, never the raw text values.
+
+### API Logic Rules:
+
+Fallbacks: Always use {{ variable if variable else "Fallback Text" }} to prevent empty UI elements during API timeouts.
+Normalization: Statuses from external APIs must be converted to lowercase before matching against the UI's color-coding logic.
+Time Format: All API timestamps should be converted to HH:MM format in app.py before being passed to the frontend.
 
 ## ⚙️ Setup & Installation
 
