@@ -3,9 +3,13 @@ from flask import Flask, render_template
 import requests
 import feedparser
 
+# Import the data from our new file
+from data import ADMIN_LINKS, RAW_TICKETS, ON_CALL_USER, MAINTENANCE_INFO
+
 app = Flask(__name__)
 
 # --- CONFIGURATION ---
+# (Placeholders for future Phase 2 integration)
 OPSGENIE_API_KEY = "YOUR_KEY"
 OPSGENIE_SCHEDULE_ID = "YOUR_ID"
 
@@ -16,19 +20,13 @@ maintenance_cache = {
 }
 
 def get_on_call():
-    """Fetches On-Call user. (Currently Mocked)"""
-    return {
-        "name": "Alex Mercer",
-        "email": "amercer@company.com",
-        "avatar": "https://i.pravatar.cc/150?u=alex", 
-        "status": "On-Shift"
-    }
+    """Returns the static on-call user from data.py"""
+    return ON_CALL_USER
 
 def get_maintenance():
     """
-    Checks for scheduled maintenance.
-    - Green state: returns None.
-    - Amber/Red: returns data with calculated status.
+    Checks for maintenance and determines status.
+    Uses basic config from data.py but calculates dynamic dates here.
     """
     global maintenance_cache
     now = datetime.now()
@@ -37,24 +35,35 @@ def get_maintenance():
     if (now - maintenance_cache['last_check']).total_seconds() < 10800:
         if maintenance_cache['data']:
             m = maintenance_cache['data']
+            # Re-evaluate status based on current time vs cached window
             m['status'] = 'active' if m['start'] <= now <= m['end'] else 'scheduled'
         return maintenance_cache['data']
 
-    # 2. MOCK DATA - Toggle 'new_data = None' to test the Green state
-    new_data = {
-        "title": "Core Firewall Firmware Upgrade",
-        "id": "CR-4402",
-        "start": now + timedelta(days=2),
-        "end": now + timedelta(days=2, hours=4),
-        "window_str": "Sat 10:00 PM - 2:00 AM CST"
-    } 
-
-    # 3. STATUS CALCULATION
-    if new_data:
-        new_data['status'] = 'active' if new_data['start'] <= now <= new_data['end'] else 'scheduled'
+    # 2. CONSTRUCT MAINTENANCE OBJECT
+    # We grab the static strings from data.py and add dynamic timestamps
+    new_data = MAINTENANCE_INFO.copy()
     
+    # TOGGLE LOGIC:
+    # To test "Green" state (No maintenance), set new_data to None
+    # new_data = None 
+
+    if new_data:
+        # Dynamic Time Calculation:
+        # Currently set to start in 2 days. 
+        # To test "Active" (Red Flashing), change to: now - timedelta(minutes=10)
+        new_data['start'] = now + timedelta(days=2)
+        new_data['end'] = now + timedelta(days=2, hours=4)
+        
+        # Determine Status
+        if new_data['start'] <= now <= new_data['end']:
+            new_data['status'] = 'active'
+        else:
+            new_data['status'] = 'scheduled'
+    
+    # Update Cache
     maintenance_cache['data'] = new_data
     maintenance_cache['last_check'] = now
+    
     return new_data
 
 def get_ticket_status_class(status):
@@ -84,6 +93,7 @@ def get_health_data():
         "GitHub": "https://www.githubstatus.com/api/v2/summary.json",
         "Atlassian": "https://status.atlassian.com/api/v2/summary.json"
     }
+    
     for name, url in json_targets.items():
         try:
             response = requests.get(url, timeout=5)
@@ -123,32 +133,20 @@ def index():
     on_call_person = get_on_call()
     maintenance_info = get_maintenance()
     
-    admin_links = [
-        {"name": "EntraID", "url": "https://entra.microsoft.com", "icon": "https://www.google.com/s2/favicons?domain=entra.microsoft.com&sz=64"},
-        {"name": "Intune", "url": "https://intune.microsoft.com", "icon": "https://www.google.com/s2/favicons?domain=intune.microsoft.com&sz=64"},
-        {"name": "365 Admin", "url": "https://admin.microsoft.com", "icon": "https://www.google.com/s2/favicons?domain=admin.microsoft.com&sz=64"},
-        {"name": "Google Admin", "url": "https://admin.google.com", "icon": "https://www.google.com/s2/favicons?domain=admin.google.com&sz=64"},
-        {"name": "vCenter", "url": "https://vcenter.local", "icon": "https://www.google.com/s2/favicons?domain=vmware.com&sz=64"},
-        {"name": "CDW", "url": "https://www.cdw.com", "icon": "https://www.google.com/s2/favicons?domain=cdw.com&sz=64"},
-        {"name": "Apple Business", "url": "https://business.apple.com", "icon": "https://www.apple.com/favicon.ico"},
-    ]
-    
-    raw_tickets = [
-        {"id": "INC-1024", "summary": "Outlook connectivity issues", "description": "Users in Sales reporting intermittent connection errors when sending emails with large attachments.", "status": "In Progress", "assigned_to": "Alex Mercer", "time": "10:42"},
-        {"id": "REQ-3391", "summary": "New user onboarding: Sarah Jenkins", "description": "Provision AD account and O365 license for new HR Manager starting Monday.", "status": "Waiting for Customer", "assigned_to": "Jordan Smith", "time": "09:15"},
-        {"id": "INC-1023", "summary": "Printer on 3rd floor jamming", "description": "Xerox AltaLink displaying Tray 2 Jam error despite being cleared.", "status": "Waiting for Support", "assigned_to": "Unassigned", "time": "08:55"},
-        {"id": "INC-1010", "summary": "Password Reset", "description": "User locked out of ERP portal after several failed login attempts.", "status": "Done", "assigned_to": "Alex Mercer", "time": "08:00"}
-    ]
+    # Process Ticket Data: Calculate color classes here in the route
+    processed_tickets = []
+    for t in RAW_TICKETS:
+        # Create a copy so we don't modify the original data file
+        ticket = t.copy()
+        ticket['color_class'] = get_ticket_status_class(t['status'])
+        processed_tickets.append(ticket)
 
-    for t in raw_tickets:
-        t['color_class'] = get_ticket_status_class(t['status'])
-
-    ticket_feed = {"status": "Active", "tickets": raw_tickets}
+    ticket_feed = {"status": "Active", "tickets": processed_tickets}
     
     now = datetime.now()
     return render_template('index.html', 
                            services=status_list, 
-                           admin_links=admin_links,
+                           admin_links=ADMIN_LINKS, 
                            ticket_feed=ticket_feed,
                            on_call=on_call_person,
                            maintenance=maintenance_info, 
