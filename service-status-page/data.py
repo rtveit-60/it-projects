@@ -44,6 +44,38 @@ RAW_TICKETS = [
         "status": "Done", 
         "assigned_to": "Alex Mercer", 
         "time": "08:00"
+    },
+    {
+        "id": "INC-1008", 
+        "summary": "VPN Certificate Expired", 
+        "description": "User unable to connect to VPN. Certificate renewal required on local machine.", 
+        "status": "Resolved", 
+        "assigned_to": "Jordan Smith", 
+        "time": "Yesterday"
+    },
+    {
+        "id": "REQ-3380", 
+        "summary": "Monitor Stand Request", 
+        "description": "Dual monitor stand installation for Finance desk 4.", 
+        "status": "Done", 
+        "assigned_to": "Alex Mercer", 
+        "time": "Yesterday"
+    },
+    {
+        "id": "INC-1005", 
+        "summary": "Keyboard Malfunction", 
+        "description": "Enter key stuck on receptionist keyboard. Replaced with spare unit.", 
+        "status": "Done", 
+        "assigned_to": "Unassigned", 
+        "time": "Feb 14"
+    },
+    {
+        "id": "INC-0998", 
+        "summary": "Guest Wifi Access", 
+        "description": "Generated temporary guest credentials for visiting auditor.", 
+        "status": "Resolved", 
+        "assigned_to": "Jordan Smith", 
+        "time": "Feb 14"
     }
 ]
 
@@ -56,7 +88,6 @@ ON_CALL_USER = {
 }
 
 # --- MAINTENANCE CONFIGURATION ---
-# Note: Start/End times are calculated in app.py to keep them dynamic relative to "now"
 MAINTENANCE_INFO = {
     "title": "Core Firewall Firmware Upgrade",
     "id": "CR-4402",
