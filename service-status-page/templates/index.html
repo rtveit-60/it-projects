@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="60">
-    <title>NOC Health Dashboard</title>
+    <title>IT Services Health Dashboard</title>
     <style>
         :root {
             --bg-dark: #212529; 
@@ -24,19 +24,18 @@
             padding: 40px;
         }
 
-        .container { max-width: 900px; margin: auto; }
+        .container { max-width: 1000px; margin: auto; }
 
         header { 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            margin-bottom: 40px; 
+            margin-bottom: 30px; 
             border-bottom: 1px solid var(--border);
             padding-bottom: 20px;
         }
 
         .sync-container { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
-        
         .date-box {
             border: 1px solid var(--border);
             padding: 4px 12px;
@@ -45,9 +44,51 @@
             font-size: 0.75rem;
             font-weight: 700;
         }
-
         .timestamp { color: var(--text-dim); font-size: 0.8rem; font-family: monospace; }
 
+        /* Admin Toolbox Styling */
+        .admin-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: linear-gradient(145deg, #2b3035, #23272b);
+            border-radius: 8px;
+            border-left: 5px solid var(--warning);
+        }
+
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 4 Wide Layout */
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .admin-btn {
+            text-decoration: none;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-btn:hover {
+            background: var(--border);
+            transform: translateY(-2px);
+        }
+
+        .admin-icon {
+            width: 18px;
+            height: 18px;
+            object-fit: contain;
+        }
+
+        /* Service Grid Styling */
         .service-grid { display: grid; gap: 15px; }
 
         .service-card {
@@ -75,14 +116,12 @@
             background: white; 
             padding: 4px;
             border-radius: 4px;
-            border: 1px solid #000000; 
+            border: 1px solid #000; 
         }
 
         .service-info { display: flex; flex-direction: column; }
         .service-info strong { font-size: 1.1rem; }
-        .service-info span { color: var(--text-dim); font-size: 0.85rem; }
 
-        /* Region Tag Styling */
         .region-tag {
             font-size: 0.65rem;
             color: var(--text-dim);
@@ -118,17 +157,17 @@
             margin-bottom: 8px;
             display: flex;
             gap: 12px;
-            line-height: 1.4;
         }
 
-        .feed-time { color: var(--text-dim); font-family: monospace; white-space: nowrap; }
-
-        .message-feed::-webkit-scrollbar { width: 5px; }
-        .message-feed::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        .feed-time { color: var(--text-dim); font-family: monospace; }
 
         .good { background: rgba(46, 204, 113, 0.1); color: var(--success); }
-        .critical { background: rgba(231, 76, 60, 0.1); color: var(--error); }
         .warning { background: rgba(241, 196, 15, 0.1); color: var(--warning); }
+        .critical { background: rgba(231, 76, 60, 0.1); color: var(--error); }
+
+        @media (max-width: 768px) {
+            .admin-grid { grid-template-columns: repeat(2, 1fr); }
+        }
     </style>
 </head>
 <body>
@@ -141,6 +180,21 @@
             </div>
         </header>
 
+        <section class="admin-section">
+            <div class="service-info">
+                <strong>IT Administrator Toolbox</strong>
+                <span style="font-size: 0.85rem; color: var(--text-dim);">Internal Management Portals</span>
+            </div>
+            <div class="admin-grid">
+                {% for link in admin_links %}
+                <a href="{{ link.url }}" target="_blank" class="admin-btn">
+                    <img src="{{ link.icon }}" class="admin-icon" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1243/1243911.png'">
+                    {{ link.name }}
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+
         <div class="service-grid">
             {% for service in services %}
             <div class="service-card">
@@ -149,12 +203,10 @@
                         <img src="{{ service.logo }}" class="vendor-logo">
                         <div class="service-info">
                             <strong>{{ service.name }}</strong>
-                            
                             {% if service.region %}
                             <div class="region-tag">{{ service.region }}</div>
                             {% endif %}
-                            
-                            <span>{{ service.status }}</span>
+                            <span style="font-size: 0.85rem; color: var(--text-dim);">{{ service.status }}</span>
                         </div>
                     </div>
                     <div class="status-badge {{ service.class }}">
