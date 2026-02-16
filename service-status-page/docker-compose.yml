@@ -1,0 +1,13 @@
+services:
+  dashboard:
+    build: .
+    container_name: it-health-dashboard
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - LIVE_JIRA=False  # Switch this to True when you add the token below
+      # - JIRA_API_TOKEN=${JIRA_API_TOKEN}  # Future AWS Prep
+    volumes:
+      - ./data.py:/app/data.py  # Allows you to edit data.py locally and see updates instantly

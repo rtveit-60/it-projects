@@ -1,0 +1,25 @@
+# 1. Use an official, stable, and lightweight Python base image
+FROM python:3.11-slim
+
+# 2. Set the working directory inside the container
+WORKDIR /app
+
+# 3. Prevent Python from writing .pyc files and enable unbuffered logging
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# 4. Copy only the requirements first (to leverage Docker's layer caching)
+COPY requirements.txt .
+
+# 5. Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 6. Copy the rest of your application code
+COPY . .
+
+# 7. Expose the port the app runs on
+EXPOSE 5000
+
+# 8. Start the application using Waitress (Production Grade)
+# We point to 'app' (the Flask instance) inside 'app.py'
+CMD ["python", "-c", "from waitress import serve; from app import app; serve(app, host='0.0.0.0', port=5000)"]
