@@ -5,10 +5,11 @@ ADMIN_LINKS = [
     {"name": "EntraID", "url": "https://entra.microsoft.com", "icon": "https://www.google.com/s2/favicons?domain=entra.microsoft.com&sz=64"},
     {"name": "Intune", "url": "https://intune.microsoft.com", "icon": "https://www.google.com/s2/favicons?domain=intune.microsoft.com&sz=64"},
     {"name": "365 Admin", "url": "https://admin.microsoft.com", "icon": "https://www.google.com/s2/favicons?domain=admin.microsoft.com&sz=64"},
+    {"name": "MyApps", "url": "https://myapps.microsoft.com", "icon": "https://www.google.com/s2/favicons?domain=myapps.microsoft.com&sz=64"}, # New Entry
     {"name": "Google Admin", "url": "https://admin.google.com", "icon": "https://www.google.com/s2/favicons?domain=admin.google.com&sz=64"},
     {"name": "vCenter", "url": "https://vcenter.local", "icon": "https://www.google.com/s2/favicons?domain=vmware.com&sz=64"},
     {"name": "CDW", "url": "https://www.cdw.com", "icon": "https://www.google.com/s2/favicons?domain=cdw.com&sz=64"},
-    {"name": "Apple Business Manager", "url": "https://business.apple.com", "icon": "https://www.apple.com/favicon.ico"},
+    {"name": "Apple Busines Manager", "url": "https://business.apple.com", "icon": "https://www.google.com/s2/favicons?domain=apple.com&sz=64"}
 ]
 
 # --- ATLASSIAN TARGETS ---
