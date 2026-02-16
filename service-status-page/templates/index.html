@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="60">
-    <title>IT Services Health Dashboard</title>
+    <title>IT Services & Health Dashboard</title>
     <style>
         :root {
             --bg-dark: #212529; 
@@ -14,6 +14,7 @@
             --success: #2ecc71;
             --error: #e74c3c;
             --warning: #f1c40f;
+            --highlight-blue: #1089da;
         }
 
         body { 
@@ -52,12 +53,12 @@
             padding: 20px;
             background: linear-gradient(145deg, #2b3035, #23272b);
             border-radius: 8px;
-            border-left: 5px solid var(--warning);
+            border-left: 5px solid var(--highlight-blue);
         }
 
         .admin-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr); /* 4 Wide Layout */
+            grid-template-columns: repeat(4, 1fr);
             gap: 12px;
             margin-top: 15px;
         }
@@ -80,31 +81,34 @@
         .admin-btn:hover {
             background: var(--border);
             transform: translateY(-2px);
+            border-color: var(--highlight-blue);
         }
 
-        .admin-icon {
-            width: 18px;
-            height: 18px;
-            object-fit: contain;
-        }
+        .admin-icon { width: 18px; height: 18px; object-fit: contain; }
 
         /* Service Grid Styling */
         .service-grid { display: grid; gap: 15px; }
 
+        /* Modified: Service card is now just a layout wrapper, not the visual box */
         .service-card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 8px;
             display: flex;
             flex-direction: column; 
-            border: 1px solid var(--border);
+            background: transparent;
+            border: none;
         }
 
-        .service-main-row {
+        /* The Top Pane: Now visually distinct and floating "above" */
+        .card-top {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px; /* Fully rounded */
+            padding: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            width: 100%;
+            position: relative;
+            z-index: 2; /* Sits on top of the feed */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.25); /* The "Underneath" Shadow effect */
         }
 
         .branding { display: flex; align-items: center; gap: 15px; }
@@ -144,22 +148,44 @@
             text-transform: uppercase;
         }
 
+        /* The Bottom Pane: Indented and tucked underneath */
         .message-feed {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid var(--border);
-            max-height: 120px;
-            overflow-y: auto;
+            background: #111;
+            width: 94%; /* Indent on either side */
+            margin: -6px auto 0; /* Pull up to sit under the top card */
+            padding: 15px 15px 10px; /* Extra top padding to clear the overlap */
+            border: 1px solid #000;
+            border-top: none; /* Seamless connection */
+            border-radius: 0 0 10px 10px; /* Softened bottom corners */
+            position: relative;
+            z-index: 1; /* Sits behind */
+            box-shadow: inset 0 6px 6px -4px rgba(0,0,0,0.8); /* Inner shadow for depth */
+            min-height: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .feed-item {
             font-size: 0.75rem;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             display: flex;
             gap: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 4px;
         }
+        .feed-item:last-child { border-bottom: none; margin-bottom: 0; }
 
-        .feed-time { color: var(--text-dim); font-family: monospace; }
+        .feed-time { color: var(--highlight-blue); font-family: monospace; }
+        .feed-text { color: var(--text-dim); }
+
+        .empty-feed {
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            font-style: italic;
+            opacity: 0.4;
+            text-align: center;
+        }
 
         .good { background: rgba(46, 204, 113, 0.1); color: var(--success); }
         .warning { background: rgba(241, 196, 15, 0.1); color: var(--warning); }
@@ -173,7 +199,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>IT Services Health Dashboard</h1>
+            <h1>IT Services & Health Dashboard</h1>
             <div class="sync-container">
                 <div class="date-box">{{ date }}</div>
                 <div class="timestamp">LAST SYNC: {{ last_updated }}</div>
@@ -198,7 +224,7 @@
         <div class="service-grid">
             {% for service in services %}
             <div class="service-card">
-                <div class="service-main-row">
+                <div class="card-top">
                     <div class="branding">
                         <img src="{{ service.logo }}" class="vendor-logo">
                         <div class="service-info">
@@ -214,16 +240,18 @@
                     </div>
                 </div>
 
-                {% if service.feed %}
                 <div class="message-feed">
-                    {% for item in service.feed %}
-                    <div class="feed-item">
-                        <span class="feed-time">[{{ item.time }}]</span>
-                        <span class="feed-text">{{ item.text }}</span>
-                    </div>
-                    {% endfor %}
+                    {% if service.feed %}
+                        {% for item in service.feed %}
+                        <div class="feed-item">
+                            <span class="feed-time">[{{ item.time }}]</span>
+                            <span class="feed-text">{{ item.text }}</span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-feed">No Active Alerts</div>
+                    {% endif %}
                 </div>
-                {% endif %}
             </div>
             {% endfor %}
         </div>

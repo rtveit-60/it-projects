@@ -78,14 +78,14 @@ def index():
     
     # 4x2 Admin Toolbox Links
     admin_links = [
-        {"name": "EntraID", "url": "https://entra.microsoft.com", "icon": "https://aadcdn.msauth.net/shared/1.0/content/images/favicon_a_e8w9_p8bm_sr_hux_8a.ico"},
-        {"name": "Intune", "url": "https://intune.microsoft.com", "icon": "https://intune.microsoft.com/favicon.ico"},
-        {"name": "365 Admin", "url": "https://admin.microsoft.com", "icon": "https://admin.microsoft.com/favicon.ico"},
-        {"name": "Google Admin", "url": "https://admin.google.com", "icon": "https://www.gstatic.com/images/branding/product/1x/admin_64dp.png"},
-        {"name": "vCenter Console", "url": "https://vcenter.local", "icon": "https://www.vmware.com/favicon.ico"},
-        {"name": "CDW", "url": "https://www.cdw.com", "icon": "https://www.cdw.com/favicon.ico"},
-        {"name": "Apple Business", "url": "https://business.apple.com", "icon": "https://business.apple.com/favicon.ico"},
-        # {"name": "Confluence", "url": "#", "icon": "https://wac-cdn.atlassian.com/assets/img/favicons/confluence/favicon.png"}
+        {"name": "EntraID", "url": "https://entra.microsoft.com", "icon": "https://www.google.com/s2/favicons?domain=entra.microsoft.com&sz=64"},
+        {"name": "Intune", "url": "https://intune.microsoft.com", "icon": "https://www.google.com/s2/favicons?domain=intune.microsoft.com&sz=64"},
+        {"name": "365 Admin", "url": "https://admin.microsoft.com", "icon": "https://www.google.com/s2/favicons?domain=admin.microsoft.com&sz=64"},
+        {"name": "Google Admin", "url": "https://admin.google.com", "icon": "https://www.google.com/s2/favicons?domain=admin.google.com&sz=64"},
+        {"name": "vCenter", "url": "https://vcenter.local", "icon": "https://www.google.com/s2/favicons?domain=vmware.com&sz=64"}, # Use public VMware icon since local might fail
+        {"name": "CDW", "url": "https://www.cdw.com", "icon": "https://www.google.com/s2/favicons?domain=cdw.com&sz=64"},
+        {"name": "Apple Business", "url": "https://business.apple.com", "icon": "https://www.google.com/s2/favicons?domain=business.apple.com&sz=64"},
+        # {"name": "Confluence", "url": "#", "icon": "https://www.google.com/s2/favicons?domain=atlassian.com&sz=64"} 
     ]
     
     now = datetime.now()
