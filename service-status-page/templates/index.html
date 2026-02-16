@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="60">
     <title>IT Services & Health Dashboard</title>
+    <title>IT Services & Health Dashboard</title>
     <style>
         :root {
             --bg-dark: #212529; 
@@ -15,6 +16,7 @@
             --success: #2ecc71;
             --error: #e74c3c;
             --warning: #f1c40f;
+            --highlight-blue: #1089da;
             --highlight-blue: #1089da;
         }
 
@@ -63,10 +65,12 @@
             background: linear-gradient(145deg, #2b3035, #23272b);
             border-radius: 8px;
             border-left: 5px solid var(--highlight-blue);
+            border-left: 5px solid var(--highlight-blue);
         }
 
         .admin-grid {
             display: grid;
+            grid-template-columns: repeat(4, 1fr);
             grid-template-columns: repeat(4, 1fr);
             gap: 12px;
             margin-top: 15px;
@@ -101,6 +105,7 @@
         /* Service Grid */
         .service-grid { display: grid; gap: 15px; }
 
+        /* Modified: Service card is now just a layout wrapper, not the visual box */
         .service-card {
             display: flex;
             flex-direction: column; 
@@ -143,6 +148,7 @@
             padding: 5px 12px; border-radius: 4px; text-transform: uppercase;
         }
 
+        /* The Bottom Pane: Indented and tucked underneath */
         .message-feed {
             background: #111;
             width: 88%; /* Reduced from 94% for a tighter fit */
@@ -252,6 +258,7 @@
 <body>
     <div class="container">
         <header>
+            <h1>IT Services & Health Dashboard</h1>
             <h1>IT Services & Health Dashboard</h1>
             <div class="sync-container">
                 <div class="date-box">{{ date }}</div>
