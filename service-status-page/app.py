@@ -8,7 +8,6 @@ app = Flask(__name__)
 # --- CONFIGURATION ---
 OPSGENIE_API_KEY = "YOUR_KEY"
 OPSGENIE_SCHEDULE_ID = "YOUR_ID"
-# ---------------------
 
 # CACHE STORAGE
 maintenance_cache = {
@@ -17,7 +16,7 @@ maintenance_cache = {
 }
 
 def get_on_call():
-    # Mock Data
+    """Fetches On-Call user. (Currently Mocked)"""
     return {
         "name": "Alex Mercer",
         "email": "amercer@company.com",
@@ -26,54 +25,52 @@ def get_on_call():
     }
 
 def get_maintenance():
+    """
+    Checks for scheduled maintenance.
+    - Green state: returns None.
+    - Amber/Red: returns data with calculated status.
+    """
     global maintenance_cache
     now = datetime.now()
     
-    # 1. CHECK CACHE (3 Hour expiry)
+    # 1. CACHE CHECK (3 Hour expiry)
     if (now - maintenance_cache['last_check']).total_seconds() < 10800:
+        if maintenance_cache['data']:
+            m = maintenance_cache['data']
+            m['status'] = 'active' if m['start'] <= now <= m['end'] else 'scheduled'
         return maintenance_cache['data']
 
-    # 2. MOCK DATA - UNCOMMENT ONE BLOCK TO TEST COLORS
-    
-    # [SCENARIO 1: GREEN] No Maintenance
-    new_data = None 
+    # 2. MOCK DATA - Toggle 'new_data = None' to test the Green state
+    new_data = {
+        "title": "Core Firewall Firmware Upgrade",
+        "id": "CR-4402",
+        "start": now + timedelta(days=2),
+        "end": now + timedelta(days=2, hours=4),
+        "window_str": "Sat 10:00 PM - 2:00 AM CST"
+    } 
 
-    # [SCENARIO 2: AMBER] Upcoming Maintenance (2 days from now)
-    # new_data = {
-    #     "title": "Database Migration",
-    #     "id": "CR-9981",
-    #     "start": now + timedelta(days=2), 
-    #     "end": now + timedelta(days=2, hours=4),
-    #     "window_str": "Saturday 10:00 PM - 2:00 AM",
-    #     "status": "scheduled" # Python calculates this below normally
-    # }
-
-    #[SCENARIO 3: FLASHING RED] Active Right Now
-    # new_data = {
-    #     "title": "Emergency Firewall Patch",
-    #     "id": "INC-CRIT-1",
-    #     "start": now - timedelta(minutes=30), 
-    #     "end": now + timedelta(hours=1),
-    #     "window_str": "Active Now: 9:00 PM - 11:00 PM",
-    #     "status": "active"
-    # }
-
-    # 3. LOGIC: Determine status if data exists
+    # 3. STATUS CALCULATION
     if new_data:
-        if new_data['start'] <= now <= new_data['end']:
-            new_data['status'] = 'active'     # Flashing Red
-        else:
-            new_data['status'] = 'scheduled'  # Amber
+        new_data['status'] = 'active' if new_data['start'] <= now <= new_data['end'] else 'scheduled'
     
-    # Update Cache
     maintenance_cache['data'] = new_data
     maintenance_cache['last_check'] = now
-    
     return new_data
 
+def get_ticket_status_class(status):
+    """Maps Jira status text to CSS color classes."""
+    s = status.lower()
+    if s in ['waiting for customer', 'pending', 'in progress']:
+        return 'status-blue'
+    elif s == 'done':
+        return 'status-green'
+    elif s == 'waiting for support':
+        return 'status-yellow'
+    return 'status-default'
+
 def get_health_data():
+    """Fetches real-time status from GitHub, Atlassian, and AWS RSS."""
     results = []
-    
     logos = {
         "GitHub": "https://github.githubassets.com/favicons/favicon.svg",
         "Atlassian": "https://wac-cdn.atlassian.com/assets/img/favicons/atlassian/favicon.png",
@@ -87,7 +84,6 @@ def get_health_data():
         "GitHub": "https://www.githubstatus.com/api/v2/summary.json",
         "Atlassian": "https://status.atlassian.com/api/v2/summary.json"
     }
-    
     for name, url in json_targets.items():
         try:
             response = requests.get(url, timeout=5)
@@ -101,18 +97,11 @@ def get_health_data():
                 dt = datetime.strptime(inc['created_at'], '%Y-%m-%dT%H:%M:%SZ')
                 messages.append({"time": dt.strftime('%H:%M'), "text": inc['name']})
 
-            results.append({
-                "name": name,
-                "region": None,
-                "status": display_status,
-                "class": status_class,
-                "logo": logos.get(name, ""),
-                "feed": messages
-            })
+            results.append({"name": name, "region": None, "status": display_status, "class": status_class, "logo": logos.get(name, ""), "feed": messages})
         except Exception:
             results.append({"name": name, "status": "API Error", "class": "critical", "logo": logos.get(name, ""), "feed": []})
 
-    # 2. AWS RSS Feeds
+    # 2. AWS RSS
     for svc in ["ec2", "s3", "lambda"]:
         name_key = f"AWS {svc.upper()}"
         rss_url = f"https://status.aws.amazon.com/rss/{svc}-us-east-1.rss"
@@ -122,20 +111,10 @@ def get_health_data():
             for entry in feed.entries[:5]:
                 time_str = datetime(*entry.published_parsed[:6]).strftime('%H:%M')
                 messages.append({"time": time_str, "text": entry.title})
-
             is_normal = not feed.entries or "normally" in feed.entries[0].title.lower()
-            
-            results.append({
-                "name": name_key,
-                "region": "us-east-1",
-                "status": "All Services Currently Operational" if is_normal else "Service Alert",
-                "class": "good" if is_normal else "warning",
-                "logo": logos.get(name_key, ""),
-                "feed": messages
-            })
+            results.append({"name": name_key, "region": "us-east-1", "status": "All Services Currently Operational" if is_normal else "Service Alert", "class": "good" if is_normal else "warning", "logo": logos.get(name_key, ""), "feed": messages})
         except Exception:
             results.append({"name": name_key, "status": "RSS Error", "class": "critical", "logo": logos.get(name_key, ""), "feed": []})
-    
     return results
 
 @app.route('/')
@@ -154,14 +133,17 @@ def index():
         {"name": "Apple Business", "url": "https://business.apple.com", "icon": "https://www.apple.com/favicon.ico"},
     ]
     
-    ticket_feed = {
-        "status": "Concept Preview",
-        "tickets": [
-            {"id": "INC-1024", "summary": "Outlook connectivity issues reported by Sales", "time": "10:42"},
-            {"id": "REQ-3391", "summary": "New user onboarding: Sarah Jenkins", "time": "09:15"},
-            {"id": "INC-1023", "summary": "Printer on 3rd floor jamming", "time": "08:55"}
-        ]
-    }
+    raw_tickets = [
+        {"id": "INC-1024", "summary": "Outlook connectivity issues", "description": "Users in Sales reporting intermittent connection errors when sending emails with large attachments.", "status": "In Progress", "assigned_to": "Alex Mercer", "time": "10:42"},
+        {"id": "REQ-3391", "summary": "New user onboarding: Sarah Jenkins", "description": "Provision AD account and O365 license for new HR Manager starting Monday.", "status": "Waiting for Customer", "assigned_to": "Jordan Smith", "time": "09:15"},
+        {"id": "INC-1023", "summary": "Printer on 3rd floor jamming", "description": "Xerox AltaLink displaying Tray 2 Jam error despite being cleared.", "status": "Waiting for Support", "assigned_to": "Unassigned", "time": "08:55"},
+        {"id": "INC-1010", "summary": "Password Reset", "description": "User locked out of ERP portal after several failed login attempts.", "status": "Done", "assigned_to": "Alex Mercer", "time": "08:00"}
+    ]
+
+    for t in raw_tickets:
+        t['color_class'] = get_ticket_status_class(t['status'])
+
+    ticket_feed = {"status": "Active", "tickets": raw_tickets}
     
     now = datetime.now()
     return render_template('index.html', 
@@ -174,4 +156,4 @@ def index():
                            date=now.strftime("%b %d, %Y"))
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000) # Note: In production, use a WSGI server like Gunicorn or Waitress instead of Flask's built-in server.
+    app.run(debug=True, port=5000)

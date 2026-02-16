@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="60">
+    <meta http-equiv="refresh" content="300">
     <title>IT Services & Health Dashboard</title>
     <style>
         :root {
@@ -38,300 +38,158 @@
             gap: 15px;
         }
 
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-        }
+        .header-top { display: flex; justify-content: space-between; align-items: center; width: 100%; }
 
         .sync-container { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
-        .date-box {
-            border: 1px solid var(--border);
-            padding: 4px 12px;
-            border-radius: 4px;
-            background: rgba(0, 0, 0, 0.3);
-            font-size: 0.75rem;
-            font-weight: 700;
-        }
+        .date-box { border: 1px solid var(--border); padding: 4px 12px; border-radius: 4px; background: rgba(0, 0, 0, 0.3); font-size: 0.75rem; font-weight: 700; }
         .timestamp { color: var(--text-dim); font-size: 0.8rem; font-family: monospace; }
 
-        /* Header Info Row */
-        .header-info-bar {
-            display: flex;
-            gap: 20px;
-            width: 100%;
-        }
+        .header-info-bar { display: flex; gap: 20px; width: 100%; }
+        .info-tab { display: flex; align-items: center; padding: 10px 15px; border-radius: 4px; gap: 15px; font-size: 0.9rem; flex-grow: 1; }
 
-        .info-tab {
-            display: flex;
-            align-items: center;
-            padding: 10px 15px;
-            border-radius: 4px;
-            gap: 15px;
-            font-size: 0.9rem;
-            flex-grow: 1;
-        }
+        .tab-ops { background: rgba(16, 137, 218, 0.1); border-left: 4px solid var(--highlight-blue); }
 
-        /* 1. IT Operations (Blue) */
-        .tab-ops {
-            background: rgba(16, 137, 218, 0.1);
-            border-left: 4px solid var(--highlight-blue);
-        }
-
-        /* 2. Scheduled Maintenance Logic */
-        
-        /* State: GREEN (No Maintenance) */
-        .tab-maint.good {
-            background: rgba(46, 204, 113, 0.1);
-            border-left: 4px solid var(--success);
-        }
+        .tab-maint.good { background: rgba(46, 204, 113, 0.1); border-left: 4px solid var(--success); }
         .tab-maint.good .tab-title { color: var(--success); }
-
-        /* State: AMBER (Scheduled Future) */
-        .tab-maint.scheduled {
-            background: rgba(243, 156, 18, 0.1);
-            border-left: 4px solid var(--highlight-amber);
-        }
+        .tab-maint.scheduled { background: rgba(243, 156, 18, 0.1); border-left: 4px solid var(--highlight-amber); }
         .tab-maint.scheduled .tab-title { color: var(--highlight-amber); }
 
-        /* State: FLASHING RED (Active Now) */
         @keyframes flash-red {
             0% { background-color: rgba(231, 76, 60, 0.15); border-left-color: #c0392b; }
             50% { background-color: rgba(231, 76, 60, 0.5); border-left-color: #ff6b6b; }
             100% { background-color: rgba(231, 76, 60, 0.15); border-left-color: #c0392b; }
         }
 
-        .tab-maint.active {
-            border-left: 4px solid var(--error);
-            animation: flash-red 2s infinite ease-in-out; /* The Pulse Effect */
-        }
+        .tab-maint.active { border-left: 4px solid var(--error); animation: flash-red 2s infinite ease-in-out; }
         .tab-maint.active .tab-title { color: #ff6b6b; }
         .tab-maint.active strong { color: #fff; text-shadow: 0 0 5px rgba(255,0,0,0.5); }
 
-
-        .tab-title {
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 0.5px;
-            border-right: 1px solid rgba(255,255,255,0.1);
-            padding-right: 15px;
-            white-space: nowrap;
-        }
-        
+        .tab-title { font-weight: 700; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; border-right: 1px solid rgba(255,255,255,0.1); padding-right: 15px; white-space: nowrap; }
         .title-ops { color: var(--highlight-blue); }
-
-        .tab-detail {
-            color: var(--text-dim);
-            display: flex;
-            gap: 5px;
-            width: 100%;
-        }
+        .tab-detail { color: var(--text-dim); display: flex; gap: 5px; width: 100%; }
         .tab-detail strong { color: var(--text-main); }
         .tab-divider { color: var(--border); }
-        .maint-empty { color: var(--text-dim); font-style: italic; opacity: 0.7; }
 
-        /* --- LAYOUT --- */
-        .dashboard-layout {
-            display: grid;
-            grid-template-columns: 1fr 320px;
-            gap: 30px;
-            align-items: start;
-        }
-
+        .dashboard-layout { display: grid; grid-template-columns: 1fr 320px; gap: 30px; align-items: start; }
         .main-content { display: flex; flex-direction: column; gap: 40px; }
 
-        .admin-section {
-            padding: 20px;
-            background: linear-gradient(145deg, #2b3035, #23272b);
-            border-radius: 8px;
-            border-left: 5px solid var(--highlight-blue);
-        }
-
-        .admin-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            margin-top: 15px;
-        }
-
-        .admin-btn {
-            text-decoration: none;
-            background: var(--card-bg);
-            color: var(--text-main);
-            padding: 12px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-        }
-
-        .admin-btn:hover {
-            background: #343a40;
-            transform: translateY(-4px); 
-            border-color: var(--highlight-blue);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-        }
-
+        .admin-section { padding: 20px; background: linear-gradient(145deg, #2b3035, #23272b); border-radius: 8px; border-left: 5px solid var(--highlight-blue); }
+        .admin-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 15px; }
+        .admin-btn { text-decoration: none; background: var(--card-bg); color: var(--text-main); padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.8rem; font-weight: 500; transition: all 0.2s ease; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.4); }
+        .admin-btn:hover { background: #343a40; transform: translateY(-4px); border-color: var(--highlight-blue); box-shadow: 0 6px 12px rgba(0,0,0,0.3); }
         .admin-icon { width: 18px; height: 18px; object-fit: contain; }
 
-        /* Service Grid */
         .service-grid { display: grid; gap: 15px; }
-
-        .service-card {
-            display: flex;
-            flex-direction: column; 
-            background: transparent;
-            border: none;
-        }
-
-        .card-top {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: relative;
-            z-index: 2;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-        }
-
+        .service-card { display: flex; flex-direction: column; background: transparent; border: none; }
+        .card-top { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px; display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.25); }
         .branding { display: flex; align-items: center; gap: 15px; }
-        .vendor-logo {
-            width: 32px; height: 32px; object-fit: contain;
-            background: white; padding: 4px;
-            border-radius: 4px; border: 1px solid #000; 
-        }
+        .vendor-logo { width: 32px; height: 32px; object-fit: contain; background: white; padding: 4px; border-radius: 4px; border: 1px solid #000; }
         .service-info { display: flex; flex-direction: column; }
         .service-info strong { font-size: 1.1rem; }
+        .region-tag { font-size: 0.65rem; color: var(--text-dim); border: 1px solid var(--border); padding: 1px 5px; border-radius: 3px; display: inline-block; width: fit-content; margin: 2px 0; text-transform: uppercase; letter-spacing: 0.5px; background: rgba(0,0,0,0.1); }
+        .status-badge { font-weight: bold; font-size: 0.7rem; padding: 5px 12px; border-radius: 4px; text-transform: uppercase; }
 
-        .region-tag {
-            font-size: 0.65rem; color: var(--text-dim);
-            border: 1px solid var(--border); padding: 1px 5px;
-            border-radius: 3px; display: inline-block; width: fit-content;
-            margin: 2px 0; text-transform: uppercase; letter-spacing: 0.5px;
-            background: rgba(0,0,0,0.1);
-        }
-
-        .status-badge {
-            font-weight: bold; font-size: 0.7rem;
-            padding: 5px 12px; border-radius: 4px; text-transform: uppercase;
-        }
-
-        .message-feed {
-            background: #111;
-            width: 88%; 
-            margin: -6px auto 0;
-            padding: 12px 15px 8px;
-            border: 1px solid #000; 
-            border-top: none;
-            border-radius: 0 0 10px 10px;
-            position: relative; 
-            z-index: 1;
-            box-shadow: inset 0 6px 6px -4px rgba(0,0,0,0.8);
-            min-height: 25px; 
-            display: flex;
-            flex-direction: column; 
-            justify-content: center;
-        }
-
-        .feed-item {
-            font-size: 0.75rem; margin-bottom: 4px; display: flex; gap: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px;
-        }
-        .feed-item:last-child { border-bottom: none; margin-bottom: 0; }
+        .message-feed { background: #111; width: 88%; margin: -6px auto 0; padding: 12px 15px 8px; border: 1px solid #000; border-top: none; border-radius: 0 0 10px 10px; position: relative; z-index: 1; box-shadow: inset 0 6px 6px -4px rgba(0,0,0,0.8); min-height: 25px; display: flex; flex-direction: column; justify-content: center; }
+        .feed-item { font-size: 0.75rem; margin-bottom: 4px; display: flex; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; }
         .feed-time { color: var(--highlight-blue); font-family: monospace; }
         .feed-text { color: var(--text-dim); }
         .empty-feed { color: var(--text-dim); font-size: 0.75rem; font-style: italic; opacity: 0.4; text-align: center; }
 
-        .sidebar {
-            background: var(--sidebar-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            height: 100%;
-            min-height: 600px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            border-top: 5px solid var(--highlight-blue);
-        }
-
-        .sidebar-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--border);
-            background: rgba(0,0,0,0.2);
-        }
+        .sidebar { background: var(--sidebar-bg); border: 1px solid var(--border); border-radius: 12px; height: 100%; min-height: 600px; display: flex; flex-direction: column; overflow: hidden; border-top: 5px solid var(--highlight-blue); }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2); }
         .sidebar-header h3 { margin: 0; font-size: 1.1rem; }
         .sidebar-header span { font-size: 0.75rem; color: var(--highlight-blue); text-transform: uppercase; letter-spacing: 1px; }
 
-        .ticket-list {
-            margin: 15px;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            box-shadow: inset 0 0 8px rgba(0,0,0,0.4);
-            flex-grow: 1;
-            display: flex;
+        .ticket-list { margin: 15px; padding: 15px; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border); border-radius: 8px; box-shadow: inset 0 0 8px rgba(0,0,0,0.4); flex-grow: 1; display: flex; flex-direction: column; gap: 15px; }
+
+        /* --- PREMIUM TICKET LAYOUT: Standardized Vertical Rhythm --- */
+        .ticket-card { 
+            background: var(--card-bg); 
+            border: 1px solid var(--border); 
+            border-radius: 8px; 
+            padding: 16px; 
+            transition: transform 0.2s, border-color 0.2s; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3); 
+            
+            /* The Fix: Let the card height be defined by its internal content */
+            min-height: 180px; 
+            display: flex; 
             flex-direction: column;
-            gap: 15px;
+            gap: 12px; /* This creates a perfectly uniform gap between all elements */
         }
 
-        .ticket-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 12px;
-            transition: transform 0.2s, border-color 0.2s, background-color 0.2s;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-        }
         .ticket-card:hover { 
             transform: translateX(-4px); 
             border-color: var(--highlight-blue); 
-            background: #343a40;
         }
 
-        .ticket-id { color: var(--highlight-blue); font-weight: bold; font-size: 0.8rem; display: block; margin-bottom: 4px; }
-        .ticket-summary { font-size: 0.85rem; color: var(--text-dim); display: block; line-height: 1.3; }
-        
-        .placeholder-overlay {
-            margin-top: auto;
-            padding: 30px;
-            text-align: center;
-            border-top: 1px solid var(--border);
-            background: rgba(16, 137, 218, 0.1);
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .coming-soon-badge {
-            display: inline-block;
-            background: var(--highlight-blue);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.7rem;
+
+        .ticket-id { color: var(--highlight-blue); font-weight: bold; font-size: 0.75rem; }
+
+        .ticket-status {
+            font-size: 0.55rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #fff;
+            text-transform: uppercase;
             font-weight: bold;
-            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        /* Color classes for status badges */
+        .status-blue { background: rgba(16, 137, 218, 0.4); border: 1px solid rgba(16, 137, 218, 0.5); }
+        .status-green { background: rgba(46, 204, 113, 0.4); border: 1px solid rgba(46, 204, 113, 0.5); }
+        .status-yellow { background: rgba(241, 196, 15, 0.4); border: 1px solid rgba(241, 196, 15, 0.5); }
+        .status-default { background: rgba(173, 181, 189, 0.2); border: 1px solid rgba(173, 181, 189, 0.3); }
+
+        .ticket-summary { 
+            font-size: 0.95rem; 
+            color: var(--text-main); 
+            font-weight: 700; 
+            line-height: 1.2;
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+        }
+        
+        .ticket-desc {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            
+            /* This fills the remaining space, ensuring the Tech block stays at the bottom */
+            flex: 1; 
+        }
+
+        .ticket-tech {
+            font-size: 0.75rem;
+            color: var(--highlight-blue);
+            background: rgba(16, 137, 218, 0.08);
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(16, 137, 218, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            /* No margin-top needed because of the parent 'gap' property */
         }
 
         .good { background: rgba(46, 204, 113, 0.1); color: var(--success); }
         .warning { background: rgba(241, 196, 15, 0.1); color: var(--warning); }
         .critical { background: rgba(231, 76, 60, 0.1); color: var(--error); }
 
-        @media (max-width: 1100px) {
-            .dashboard-layout { grid-template-columns: 1fr; }
-            .sidebar { min-height: auto; }
-            .admin-grid { grid-template-columns: repeat(2, 1fr); }
-            /* Stack tabs on mobile */
-            .header-info-bar { flex-direction: column; gap: 10px; }
-            .info-tab { width: auto; }
-        }
+        @media (max-width: 1100px) { .dashboard-layout { grid-template-columns: 1fr; } .header-info-bar { flex-direction: column; gap: 10px; } }
     </style>
 </head>
 <body>
@@ -344,49 +202,32 @@
                     <div class="timestamp">LAST SYNC: {{ last_updated }}</div>
                 </div>
             </div>
-
             <div class="header-info-bar">
-                
                 <div class="info-tab tab-ops">
                     <div class="tab-title title-ops">IT Operations</div>
                     <div class="tab-detail">
-                        <span style="color: var(--text-dim);">On-Call:</span>
-                        <strong>{{ on_call.name }}</strong>
-                        <span style="color: var(--highlight-blue);">({{ on_call.email }})</span>
-                        <span class="tab-divider">|</span>
-                        <span style="color: var(--text-dim);">Hours:</span>
-                        <span>6pm-8pm Central Mon-Fri, 9am-1pm Sat</span>
+                        <span>On-Call:</span> <strong>{{ on_call.name }}</strong> <span style="color: var(--highlight-blue);">({{ on_call.email }})</span>
+                        <span class="tab-divider">|</span> <span>Hours:</span> <span>6pm-8pm Central Mon-Fri, 9am-1pm Sat</span>
                     </div>
                 </div>
-
                 <div class="info-tab tab-maint {% if not maintenance %}good{% elif maintenance.status == 'active' %}active{% else %}scheduled{% endif %}">
-                    
                     <div class="tab-title">Maintenance</div>
                     <div class="tab-detail">
                         {% if maintenance %}
-                            <strong style="color: #fff;">{{ maintenance.title }}</strong>
-                            <span class="tab-divider">-</span>
-                            <span style="color: #fff; font-weight: bold;">
-                                {{ maintenance.window_str }}
-                            </span>
-                            <span style="color: rgba(255,255,255,0.7); font-size: 0.8rem; margin-left:auto;">{{ maintenance.id }}</span>
+                            <strong style="color: #fff;">{{ maintenance.title }}</strong> <span class="tab-divider">-</span>
+                            <span style="color: #fff; font-weight: bold;">{{ maintenance.window_str }}</span>
                         {% else %}
                             <span style="color: #fff;">All Systems Clear - No Maintenance Scheduled</span>
                         {% endif %}
                     </div>
                 </div>
-
             </div>
         </header>
 
         <div class="dashboard-layout">
-            
             <div class="main-content">
                 <section class="admin-section">
-                    <div class="service-info">
-                        <strong>IT Administrator Toolbox</strong>
-                        <span style="font-size: 0.85rem; color: var(--text-dim);">Internal Management Portals</span>
-                    </div>
+                    <strong>IT Administrator Toolbox</strong>
                     <div class="admin-grid">
                         {% for link in admin_links %}
                         <a href="{{ link.url }}" target="_blank" class="admin-btn">
@@ -405,58 +246,48 @@
                                 <img src="{{ service.logo }}" class="vendor-logo">
                                 <div class="service-info">
                                     <strong>{{ service.name }}</strong>
-                                    {% if service.region %}
-                                    <div class="region-tag">{{ service.region }}</div>
-                                    {% endif %}
+                                    {% if service.region %}<div class="region-tag">{{ service.region }}</div>{% endif %}
                                     <span style="font-size: 0.85rem; color: var(--text-dim);">{{ service.status }}</span>
                                 </div>
                             </div>
-                            <div class="status-badge {{ service.class }}">
-                                {{ 'Operational' if service.class == 'good' else 'Alert' }}
-                            </div>
+                            <div class="status-badge {{ service.class }}">Operational</div>
                         </div>
-
                         <div class="message-feed">
                             {% if service.feed %}
-                                {% for item in service.feed %}
-                                <div class="feed-item">
-                                    <span class="feed-time">[{{ item.time }}]</span>
-                                    <span class="feed-text">{{ item.text }}</span>
-                                </div>
-                                {% endfor %}
-                            {% else %}
-                                <div class="empty-feed">All Services Currently Operational</div>
-                            {% endif %}
+                                {% for item in service.feed %}<div class="feed-item"><span class="feed-time">[{{ item.time }}]</span> <span class="feed-text">{{ item.text }}</span></div>{% endfor %}
+                            {% else %}<div class="empty-feed">All Services Currently Operational</div>{% endif %}
                         </div>
                     </div>
                     {% endfor %}
                 </div>
-            </div> 
+            </div>
 
             <aside class="sidebar">
                 <div class="sidebar-header">
                     <span>Live Stream</span>
                     <h3>Incoming Tickets</h3>
                 </div>
-
                 <div class="ticket-list">
                     {% for ticket in ticket_feed.tickets %}
                     <div class="ticket-card">
-                        <span class="ticket-id">{{ ticket.id }} <span style="float:right; color: var(--text-dim); font-weight:normal;">{{ ticket.time }}</span></span>
-                        <span class="ticket-summary">{{ ticket.summary }}</span>
+                        <div class="ticket-header">
+                            <span class="ticket-id">{{ ticket.id }}</span>
+                            <span class="ticket-status {{ ticket.color_class }}">{{ ticket.status }}</span>
+                        </div>
+                        
+                        <div class="ticket-summary">{{ ticket.summary }}</div>
+                        
+                        <div class="ticket-desc">{{ ticket.description }}</div>
+
+                        <div class="ticket-tech">
+                            <span>Assignee: <strong>{{ ticket.assigned_to }}</strong></span>
+                            <span style="opacity: 0.6; font-size: 0.7rem;">{{ ticket.time }}</span>
+                        </div>
                     </div>
                     {% endfor %}
                 </div>
-
-                <div class="placeholder-overlay">
-                    <span class="coming-soon-badge">COMING SOON</span>
-                    <p style="font-size: 0.85rem; color: var(--text-dim); margin: 0;">
-                        Jira API Integration is currently under development.
-                    </p>
-                </div>
             </aside>
-
-        </div> 
+        </div>
     </div>
 </body>
 </html>
