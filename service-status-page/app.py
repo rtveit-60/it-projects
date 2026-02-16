@@ -8,7 +8,7 @@ app = Flask(__name__)
 def get_health_data():
     results = []
     
-    # Vendor Logos for the Status Cards
+    # Vendor Logos
     logos = {
         "GitHub": "https://github.githubassets.com/favicons/favicon.svg",
         "Atlassian": "https://wac-cdn.atlassian.com/assets/img/favicons/atlassian/favicon.png",
@@ -30,6 +30,9 @@ def get_health_data():
             indicator = data.get('status', {}).get('indicator', 'none')
             status_class = "good" if indicator == "none" else "critical"
             
+            # UPDATED: Force your specific text if status is healthy
+            display_status = "All Services Currently Operational" if indicator == "none" else data.get('status', {}).get('description', 'Status Unknown')
+            
             messages = []
             for inc in data.get('incidents', [])[:5]:
                 dt = datetime.strptime(inc['created_at'], '%Y-%m-%dT%H:%M:%SZ')
@@ -38,7 +41,7 @@ def get_health_data():
             results.append({
                 "name": name,
                 "region": None,
-                "status": data.get('status', {}).get('description', 'Status Unknown'),
+                "status": display_status, 
                 "class": status_class,
                 "logo": logos.get(name, ""),
                 "feed": messages
@@ -46,7 +49,7 @@ def get_health_data():
         except Exception:
             results.append({"name": name, "status": "API Error", "class": "critical", "logo": logos.get(name, ""), "feed": []})
 
-    # 2. AWS RSS Feeds (us-east-1)
+    # 2. AWS RSS Feeds (Regional)
     for svc in ["ec2", "s3", "lambda"]:
         name_key = f"AWS {svc.upper()}"
         rss_url = f"https://status.aws.amazon.com/rss/{svc}-us-east-1.rss"
@@ -61,8 +64,9 @@ def get_health_data():
             
             results.append({
                 "name": name_key,
-                "region": "us-east-1", # Sub-header tag
-                "status": "Operational" if is_normal else "Service Alert",
+                "region": "us-east-1",
+                # UPDATED: Force your specific text for AWS
+                "status": "All Services Currently Operational" if is_normal else "Service Alert",
                 "class": "good" if is_normal else "warning",
                 "logo": logos.get(name_key, ""),
                 "feed": messages
@@ -76,25 +80,35 @@ def get_health_data():
 def index():
     status_list = get_health_data()
     
-    # 4x2 Admin Toolbox Links
+    # Corporate Admin Links
     admin_links = [
-        {"name": "EntraID", "url": "https://entra.microsoft.com", "icon": "https://aadcdn.msauth.net/shared/1.0/content/images/favicon_a_e8w9_p8bm_sr_hux_8a.ico"},
-        {"name": "Intune", "url": "https://intune.microsoft.com", "icon": "https://intune.microsoft.com/favicon.ico"},
-        {"name": "365 Admin", "url": "https://admin.microsoft.com", "icon": "https://admin.microsoft.com/favicon.ico"},
-        {"name": "Google Admin", "url": "https://admin.google.com", "icon": "https://www.gstatic.com/images/branding/product/1x/admin_64dp.png"},
-        {"name": "vCenter Console", "url": "https://vcenter.local", "icon": "https://www.vmware.com/favicon.ico"},
-        {"name": "CDW", "url": "https://www.cdw.com", "icon": "https://www.cdw.com/favicon.ico"},
-        {"name": "Apple Business", "url": "https://business.apple.com", "icon": "https://business.apple.com/favicon.ico"},
-        # {"name": "Confluence", "url": "#", "icon": "https://wac-cdn.atlassian.com/assets/img/favicons/confluence/favicon.png"}
+        {"name": "EntraID", "url": "https://entra.microsoft.com", "icon": "https://www.google.com/s2/favicons?domain=entra.microsoft.com&sz=64"},
+        {"name": "Intune", "url": "https://intune.microsoft.com", "icon": "https://www.google.com/s2/favicons?domain=intune.microsoft.com&sz=64"},
+        {"name": "365 Admin", "url": "https://admin.microsoft.com", "icon": "https://www.google.com/s2/favicons?domain=admin.microsoft.com&sz=64"},
+        {"name": "Google Admin", "url": "https://admin.google.com", "icon": "https://www.google.com/s2/favicons?domain=admin.google.com&sz=64"},
+        {"name": "vCenter", "url": "https://vcenter.local", "icon": "https://www.google.com/s2/favicons?domain=vmware.com&sz=64"},
+        {"name": "CDW", "url": "https://www.cdw.com", "icon": "https://www.google.com/s2/favicons?domain=cdw.com&sz=64"},
+        {"name": "Apple Business", "url": "https://business.apple.com", "icon": "https://www.apple.com/favicon.ico"},
+        # {"name": "Confluence", "url": "#", "icon": "https://www.google.com/s2/favicons?domain=atlassian.com&sz=64"} 
     ]
+    
+    # Ticket Feed
+    ticket_feed = {
+        "status": "Concept Preview",
+        "tickets": [
+            {"id": "INC-1024", "summary": "Outlook connectivity issues reported by Sales", "time": "10:42"},
+            {"id": "REQ-3391", "summary": "New user onboarding: Sarah Jenkins", "time": "09:15"},
+            {"id": "INC-1023", "summary": "Printer on 3rd floor jamming", "time": "08:55"}
+        ]
+    }
     
     now = datetime.now()
     return render_template('index.html', 
                            services=status_list, 
                            admin_links=admin_links,
+                           ticket_feed=ticket_feed,
                            last_updated=now.strftime("%H:%M"), 
                            date=now.strftime("%b %d, %Y"))
 
 if __name__ == '__main__':
-    # Switch to host='0.0.0.0' for corporate network access
-    app.run(debug=True, port=5000) #use waitress or similar serving for production deployment
+    app.run(debug=True, port=5000) # Note: In production, use a WSGI server like Gunicorn or Waitress instead of Flask's built-in server.
