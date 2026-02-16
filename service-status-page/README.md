@@ -1,31 +1,71 @@
 
 ---
 
-# Service Health Aggregator
+# IT Services & Health Dashboard
 
-A centralized monitoring tool to aggregate real-time status updates from **AWS (us-east-1)**, **GitHub**, and **Atlassian** into a single, normalized view.
+A high-performance, hardware-inspired monitoring dashboard built with **Python (Flask)** and **Tailwind CSS**. This tool aggregates real-time status updates from **AWS**, **GitHub**, **Atlassian**, and internal **Jira** ticket streams into a normalized, "NOC-style" interface.
 
 ## 🚀 Overview
 
-In a modern enterprise environment, tracking multiple vendor dependencies is a manual chore. This project automates the polling of disparate data sources (JSON APIs and XML RSS feeds) and normalizes the data into a standard `OPERATIONAL`, `DEGRADED`, or `OUTAGE` state.
+In a modern enterprise environment, tracking multiple vendor dependencies is a manual chore. This project automates the polling of disparate data sources (JSON APIs and XML RSS feeds) and normalizes the data into a standard 3D glass interface designed for "Always-On" monitoring.
 
-## 🛠️ Tech Stack
+## 🧱 Component Architecture & Style Guide
 
-* **Language:** Python 3.x
-* **Libraries:** `requests` (JSON API handling), `feedparser` (RSS/XML parsing)
-* **Architecture:** Modular fetcher design for easy scalability.
+### 🎨 Design Philosophy
 
-## 📁 Project Structure
+The dashboard is designed to look like a premium physical monitoring interface:
 
-```text
-status-dashboard/
-├── src/
-│   └── main.py         # Main entry point and aggregator logic
-├── .gitignore          # Prevents venv and cache from being uploaded
-├── requirements.txt    # Project dependencies
-└── README.md           # Documentation
+* **3D Glassmorphism:** Semi-transparent "floating" cards with backdrop blurring (`backdrop-filter: blur(12px)`).
+* **Dynamic Accents:** Symmetrical 4px left-side color bars indicating system health.
+* **High-Contrast Logic:** Bold italic typography paired with monospace "log-style" timestamps.
+* **Deep Recess Sidebar:** An inset-shadow "well" for the ticket stream to create a sense of mechanical depth.
 
-```
+### 1. Symmetrical Header
+
+* **Title:** `IT SERVICES & HEALTH DASHBOARD`.
+* **Accents:** Dual symmetrical cards for **On-Call Duty** (Blue) and **Maintenance Window** (Dynamic: Green/Yellow/Red).
+* **Status:** Left-side 4px border accents match the card's current urgency level.
+
+### 2. Admin Toolbox
+
+* **Layout:** A strict **4x2 grid** of 8 primary administrator tools (EntraID, Intune, etc.).
+* **Styling:** Floating glass card with a solid **Blue** left-side accent.
+* **Icons:** Full-color high-resolution brand favicons.
+
+### 3. Service Stack (Vendor Tiles)
+
+* **Layout:** Arranged in a vertical column for maximum readability and downward expansion.
+* **Status Accents:** - **Green (`#10b981`):** Operational / Nominal.
+* **Yellow (`#f59e0b`):** Degraded / Performance issues.
+* **Flashing Red (`#ef4444`):** Active Service Outage / Critical Incident.
+
+
+* **Timeline Logs:** Expandable "log-style" message boxes tucked below each vendor using a **Timeline Column** (Time + Bullet | Justified Text Body).
+* **Fade-to-Black:** Collapsed logs feature a linear gradient fade at the bottom to maintain UI cleanliness.
+* **Multi-Service Alert:** Red pulsing badge indicating the count of affected services (e.g., "3 Services Affected") for grouped vendors like Atlassian.
+
+### 4. Ticket Sidebar
+
+* **Inner Recess:** A darker, inset-shadow container (`sidebar-inner`) that separates tickets from the main UI background.
+* **Ticket Status Logic:**
+* **Blue:** In-Progress, Pending, Waiting for Customer.
+* **Yellow:** Waiting for Support.
+* **Green:** Done, Resolved.
+
+
+
+## 🛠️ Tech Stack & Structure
+
+| File | Role | Description |
+| --- | --- | --- |
+| `app.py` | **The Engine** | Flask server; handles API scraping (JSON/RSS) and data normalization. |
+| `data.py` | **The Brain** | Stores Admin Links, Mock/Static Ticket data, and On-Call settings. |
+| `index.html` | **The Face** | Jinja2 template using Tailwind CSS and the "3D Glass" custom styles. |
+| `requirements.txt` | **The Toolbox** | Python dependencies (Flask, Requests, Feedparser). |
+
+Data Separation Rule: > - Static metadata (On-Call names, coverage hours, Admin URLs) MUST reside in data.py.
+
+index.html should only contain the logic for rendering these variables, never the raw text values.
 
 ## ⚙️ Setup & Installation
 
@@ -37,84 +77,37 @@ cd status-dashboard
 ```
 
 
-2. **Create and activate a virtual environment:**
+2. **Create a virtual environment & Install:**
 ```bash
-# Windows
 python -m venv venv
-.\venv\Scripts\activate
-
-# Mac/Linux
-python3 -m venv venv
-source venv/bin/activate
-
-```
-
-
-3. **Install dependencies:**
-```bash
+source venv/bin/activate  # (.\venv\Scripts\activate on Windows)
 pip install -r requirements.txt
 
 ```
 
 
-
-## 🖥️ Usage
-
-To run the aggregator and see the current status of all configured services, execute:
-
+3. **Run the Dashboard:**
 ```bash
-python src/main.py
+python app.py
 
 ```
-
-## 🛰️ Monitored Services
-
-* **GitHub:** Main system status (JSON)
-* **Atlassian:** Core product status (JSON)
-* **AWS (us-east-1):**
-* EC2
-* S3
-* Lambda
 
 
 
 ## 🛣️ Roadmap
 
-* [ ] Add Microsoft Azure Public RSS support.
-* [ ] Integrate Microsoft Graph API for M365 (Teams/Outlook) health.
-* [ ] Build a Flask-based web frontend.
-* [ ] Add Slack/Teams notifications for status changes.
-
-## IT Services Health Dashboard: Roadmap to Production
-
-### Phase 1: Stabilization & Hosting (Current Focus)
-
-* **Containerization**: Create a `Dockerfile` to package the app for deployment on corporate clusters (e.g., Kubernetes or Docker Swarm).
-* **Production Server**: Migrate from Flask's development server to a production WSGI server like **Waitress** or **Gunicorn**.
-* **Data Persistence & Caching**: Implement a server-side cache (using `Flask-Caching`) to store status results for 5 minutes, preventing API rate-limiting issues.
-* **SSL Integration**: Deploy behind a corporate reverse proxy (Nginx/F5) to ensure all traffic is encrypted via HTTPS.
-
-### Phase 2: IT Admin & Internal Tooling
-
-* **IT Admin Quick Links**: Add a dedicated sidebar or header section for one-click access to internal tools (e.g., vCenter, Active Directory portal, or Network monitors).
-* **Jira Service Management Integration**: Connect to the Jira API to display a "Recent Tickets" feed, allowing staff to see if a global issue has already been logged.
-* **Internal Service Probes**: Add health checks for internal corporate apps (e.g., HR Portal, Email Relay) by pinging internal endpoints.
-
-### Phase 3: "Quality of Life" & Culture
-
-* **Quote of the Day**: Implement a random quote generator or a "Company Announcement" ticker to keep the dashboard engaging for daily users.
-* **Shift Handover Logs**: Add a small, read-only section pulling from an internal database showing which technician is currently "On-Call".
-* **Dark/Light Mode Toggle**: Allow users to switch between the current "NOC" dark theme and a high-contrast light theme.
-
-## 🛠️ Deployment Specs
-
-| Component | Local Development | Corporate Production |
-| --- | --- | --- |
-| **Server** | `app.run(debug=True)` | Gunicorn / Waitress |
-| **Data Fetch** | Real-time on Refresh | 5-Minute Cached Fetch |
-| **Security** | HTTP (unsecured) | HTTPS / TLS 1.3 |
-| **Logs** | Console Output | Centralized Logging (ELK/Splunk) |
+* [x] **Phase 1: Stabilization**: Move to symmetrical header accents and 4x2 Admin Grid.
+* [x] **Phase 2: UI/UX**: Implement Timeline-style log messages with fade-to-black.
+* [x] **Phase 3: Logic**: Multi-target Atlassian scanning with service counting.
+* [ ] **Phase 4: Notifications**: Add Slack/Teams webhooks for status transitions.
+* [ ] **Phase 5: Production**: Containerize via `Dockerfile` and deploy behind Nginx.
 
 ---
 
+### **AI Interaction Rule (System Prompt)**
 
+*When updating this project, the AI must strictly adhere to the established "3D Glassmorphism" aesthetic. Do not suggest migrations to React or modern JS frameworks. Maintain the single-column vertical service stack and the 4x2 Admin grid. Left-side accents must remain the primary status indicators.*
+
+---
+
+**Would you like me to generate a `Dockerfile` to match the roadmap in this README?**

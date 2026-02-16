@@ -11,6 +11,37 @@ ADMIN_LINKS = [
     {"name": "Apple Business Manager", "url": "https://business.apple.com", "icon": "https://www.apple.com/favicon.ico"},
 ]
 
+# --- ATLASSIAN TARGETS ---
+# We check these specific APIs in order. 
+# The first one to report an issue will trigger the dashboard alert.
+ATLASSIAN_TARGETS = [
+    {
+        "name": "Jira Software", 
+        "api": "https://jira-software.status.atlassian.com/api/v2/summary.json",
+        "url": "https://jira-software.status.atlassian.com"
+    },
+    {
+        "name": "Jira Service Management", 
+        "api": "https://jira-service-management.status.atlassian.com/api/v2/summary.json",
+        "url": "https://jira-service-management.status.atlassian.com"
+    },
+    {
+        "name": "Confluence", 
+        "api": "https://confluence.status.atlassian.com/api/v2/summary.json",
+        "url": "https://confluence.status.atlassian.com"
+    },
+    {
+        "name": "Jira Work Management", 
+        "api": "https://jira-work-management.status.atlassian.com/api/v2/summary.json",
+        "url": "https://jira-work-management.status.atlassian.com"
+    },
+    {
+        "name": "Access / Rovo", 
+        "api": "https://atlassian-access.status.atlassian.com/api/v2/summary.json", 
+        "url": "https://atlassian-access.status.atlassian.com"
+    }
+]
+
 # --- MOCK TICKET DATA ---
 RAW_TICKETS = [
     {
@@ -84,8 +115,10 @@ ON_CALL_USER = {
     "name": "Alex Mercer",
     "email": "amercer@company.com",
     "avatar": "https://i.pravatar.cc/150?u=alex", 
-    "status": "On-Shift"
+    "status": "On-Shift",
+    "hours": "6PM-8PM Mon-Fri / 9AM-1PM Sat"
 }
+
 
 # --- MAINTENANCE CONFIGURATION ---
 MAINTENANCE_INFO = {
