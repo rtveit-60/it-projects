@@ -4,16 +4,19 @@
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="60">
     <title>IT Services & Health Dashboard</title>
+    <title>IT Services & Health Dashboard</title>
     <style>
         :root {
             --bg-dark: #212529; 
             --card-bg: #2b3035;
+            --sidebar-bg: #23272b;
             --border: #3d444b;
             --text-main: #f8fafc;
             --text-dim: #adb5bd;
             --success: #2ecc71;
             --error: #e74c3c;
             --warning: #f1c40f;
+            --highlight-blue: #1089da;
             --highlight-blue: #1089da;
         }
 
@@ -22,10 +25,10 @@
             color: var(--text-main); 
             font-family: 'Segoe UI', Tahoma, sans-serif;
             margin: 0;
-            padding: 40px;
+            padding: 20px 40px;
         }
 
-        .container { max-width: 1000px; margin: auto; }
+        .container { max-width: 1400px; margin: auto; }
 
         header { 
             display: flex; 
@@ -47,25 +50,36 @@
         }
         .timestamp { color: var(--text-dim); font-size: 0.8rem; font-family: monospace; }
 
-        /* Admin Toolbox Styling */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .main-content { display: flex; flex-direction: column; gap: 40px; }
+
+        /* Admin Toolbox */
         .admin-section {
-            margin-bottom: 40px;
             padding: 20px;
             background: linear-gradient(145deg, #2b3035, #23272b);
             border-radius: 8px;
+            border-left: 5px solid var(--highlight-blue);
             border-left: 5px solid var(--highlight-blue);
         }
 
         .admin-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 12px;
             margin-top: 15px;
         }
 
+        /* UPDATED: Admin Buttons now match Ticket Card style exactly */
         .admin-btn {
             text-decoration: none;
-            background: var(--bg-dark);
+            background: var(--card-bg); /* Match ticket card bg */
             color: var(--text-main);
             padding: 12px;
             border: 1px solid var(--border);
@@ -76,17 +90,19 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4); /* Match ticket card shadow */
         }
 
         .admin-btn:hover {
-            background: var(--border);
-            transform: translateY(-2px);
+            background: #343a40; /* Match ticket card hover bg */
+            transform: translateY(-4px); 
             border-color: var(--highlight-blue);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
         }
 
         .admin-icon { width: 18px; height: 18px; object-fit: contain; }
 
-        /* Service Grid Styling */
+        /* Service Grid */
         .service-grid { display: grid; gap: 15px; }
 
         /* Modified: Service card is now just a layout wrapper, not the visual box */
@@ -97,101 +113,144 @@
             border: none;
         }
 
-        /* The Top Pane: Now visually distinct and floating "above" */
         .card-top {
             background: var(--card-bg);
             border: 1px solid var(--border);
-            border-radius: 8px; /* Fully rounded */
+            border-radius: 8px;
             padding: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             position: relative;
-            z-index: 2; /* Sits on top of the feed */
-            box-shadow: 0 4px 10px rgba(0,0,0,0.25); /* The "Underneath" Shadow effect */
+            z-index: 2;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.25);
         }
 
         .branding { display: flex; align-items: center; gap: 15px; }
-
         .vendor-logo {
-            width: 32px;
-            height: 32px;
-            object-fit: contain;
-            background: white; 
-            padding: 4px;
-            border-radius: 4px;
-            border: 1px solid #000; 
+            width: 32px; height: 32px; object-fit: contain;
+            background: white; padding: 4px;
+            border-radius: 4px; border: 1px solid #000; 
         }
-
         .service-info { display: flex; flex-direction: column; }
         .service-info strong { font-size: 1.1rem; }
 
         .region-tag {
-            font-size: 0.65rem;
-            color: var(--text-dim);
-            border: 1px solid var(--border);
-            padding: 1px 5px;
-            border-radius: 3px;
-            display: inline-block;
-            width: fit-content;
-            margin: 2px 0;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-size: 0.65rem; color: var(--text-dim);
+            border: 1px solid var(--border); padding: 1px 5px;
+            border-radius: 3px; display: inline-block; width: fit-content;
+            margin: 2px 0; text-transform: uppercase; letter-spacing: 0.5px;
             background: rgba(0,0,0,0.1);
         }
 
         .status-badge {
-            font-weight: bold;
-            font-size: 0.7rem;
-            padding: 5px 12px;
-            border-radius: 4px;
-            text-transform: uppercase;
+            font-weight: bold; font-size: 0.7rem;
+            padding: 5px 12px; border-radius: 4px; text-transform: uppercase;
         }
 
         /* The Bottom Pane: Indented and tucked underneath */
         .message-feed {
             background: #111;
-            width: 94%; /* Indent on either side */
-            margin: -6px auto 0; /* Pull up to sit under the top card */
-            padding: 15px 15px 10px; /* Extra top padding to clear the overlap */
-            border: 1px solid #000;
-            border-top: none; /* Seamless connection */
-            border-radius: 0 0 10px 10px; /* Softened bottom corners */
-            position: relative;
-            z-index: 1; /* Sits behind */
-            box-shadow: inset 0 6px 6px -4px rgba(0,0,0,0.8); /* Inner shadow for depth */
-            min-height: 30px;
+            width: 88%; /* Reduced from 94% for a tighter fit */
+            margin: -6px auto 0;
+            padding: 12px 15px 8px; /* Reduced vertical padding for better proportions */
+            border: 1px solid #000; 
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            position: relative; 
+            z-index: 1;
+            box-shadow: inset 0 6px 6px -4px rgba(0,0,0,0.8);
+            min-height: 25px; /* Slightly shorter minimum height */
             display: flex;
-            flex-direction: column;
+            flex-direction: column; 
             justify-content: center;
         }
-
+        
         .feed-item {
-            font-size: 0.75rem;
-            margin-bottom: 4px;
-            display: flex;
-            gap: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 4px;
+            font-size: 0.75rem; margin-bottom: 4px; display: flex; gap: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px;
         }
         .feed-item:last-child { border-bottom: none; margin-bottom: 0; }
-
         .feed-time { color: var(--highlight-blue); font-family: monospace; }
         .feed-text { color: var(--text-dim); }
+        .empty-feed { color: var(--text-dim); font-size: 0.75rem; font-style: italic; opacity: 0.4; text-align: center; }
 
-        .empty-feed {
-            color: var(--text-dim);
-            font-size: 0.75rem;
-            font-style: italic;
-            opacity: 0.4;
+        /* --- RIGHT COLUMN: Ticket Sidebar --- */
+        .sidebar {
+            background: var(--sidebar-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            height: 100%;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-top: 5px solid var(--highlight-blue);
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(0,0,0,0.2);
+        }
+        .sidebar-header h3 { margin: 0; font-size: 1.1rem; }
+        .sidebar-header span { font-size: 0.75rem; color: var(--highlight-blue); text-transform: uppercase; letter-spacing: 1px; }
+
+        .ticket-list {
+            margin: 15px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: inset 0 0 8px rgba(0,0,0,0.4);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .ticket-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px;
+            transition: transform 0.2s, border-color 0.2s, background-color 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+        .ticket-card:hover { 
+            transform: translateX(-4px); 
+            border-color: var(--highlight-blue); 
+            background: #343a40;
+        }
+
+        .ticket-id { color: var(--highlight-blue); font-weight: bold; font-size: 0.8rem; display: block; margin-bottom: 4px; }
+        .ticket-summary { font-size: 0.85rem; color: var(--text-dim); display: block; line-height: 1.3; }
+        
+        .placeholder-overlay {
+            margin-top: auto;
+            padding: 30px;
             text-align: center;
+            border-top: 1px solid var(--border);
+            background: rgba(16, 137, 218, 0.1);
+        }
+        .coming-soon-badge {
+            display: inline-block;
+            background: var(--highlight-blue);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-bottom: 10px;
         }
 
         .good { background: rgba(46, 204, 113, 0.1); color: var(--success); }
         .warning { background: rgba(241, 196, 15, 0.1); color: var(--warning); }
         .critical { background: rgba(231, 76, 60, 0.1); color: var(--error); }
 
-        @media (max-width: 768px) {
+        @media (max-width: 1100px) {
+            .dashboard-layout { grid-template-columns: 1fr; }
+            .sidebar { min-height: auto; }
             .admin-grid { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
@@ -200,61 +259,91 @@
     <div class="container">
         <header>
             <h1>IT Services & Health Dashboard</h1>
+            <h1>IT Services & Health Dashboard</h1>
             <div class="sync-container">
                 <div class="date-box">{{ date }}</div>
                 <div class="timestamp">LAST SYNC: {{ last_updated }}</div>
             </div>
         </header>
 
-        <section class="admin-section">
-            <div class="service-info">
-                <strong>IT Administrator Toolbox</strong>
-                <span style="font-size: 0.85rem; color: var(--text-dim);">Internal Management Portals</span>
-            </div>
-            <div class="admin-grid">
-                {% for link in admin_links %}
-                <a href="{{ link.url }}" target="_blank" class="admin-btn">
-                    <img src="{{ link.icon }}" class="admin-icon" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1243/1243911.png'">
-                    {{ link.name }}
-                </a>
-                {% endfor %}
-            </div>
-        </section>
-
-        <div class="service-grid">
-            {% for service in services %}
-            <div class="service-card">
-                <div class="card-top">
-                    <div class="branding">
-                        <img src="{{ service.logo }}" class="vendor-logo">
-                        <div class="service-info">
-                            <strong>{{ service.name }}</strong>
-                            {% if service.region %}
-                            <div class="region-tag">{{ service.region }}</div>
-                            {% endif %}
-                            <span style="font-size: 0.85rem; color: var(--text-dim);">{{ service.status }}</span>
-                        </div>
+        <div class="dashboard-layout">
+            
+            <div class="main-content">
+                <section class="admin-section">
+                    <div class="service-info">
+                        <strong>IT Administrator Toolbox</strong>
+                        <span style="font-size: 0.85rem; color: var(--text-dim);">Internal Management Portals</span>
                     </div>
-                    <div class="status-badge {{ service.class }}">
-                        {{ 'Operational' if service.class == 'good' else 'Alert' }}
-                    </div>
-                </div>
-
-                <div class="message-feed">
-                    {% if service.feed %}
-                        {% for item in service.feed %}
-                        <div class="feed-item">
-                            <span class="feed-time">[{{ item.time }}]</span>
-                            <span class="feed-text">{{ item.text }}</span>
-                        </div>
+                    <div class="admin-grid">
+                        {% for link in admin_links %}
+                        <a href="{{ link.url }}" target="_blank" class="admin-btn">
+                            <img src="{{ link.icon }}" class="admin-icon" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1243/1243911.png'">
+                            {{ link.name }}
+                        </a>
                         {% endfor %}
-                    {% else %}
-                        <div class="empty-feed">No Active Alerts</div>
-                    {% endif %}
+                    </div>
+                </section>
+
+                <div class="service-grid">
+                    {% for service in services %}
+                    <div class="service-card">
+                        <div class="card-top">
+                            <div class="branding">
+                                <img src="{{ service.logo }}" class="vendor-logo">
+                                <div class="service-info">
+                                    <strong>{{ service.name }}</strong>
+                                    {% if service.region %}
+                                    <div class="region-tag">{{ service.region }}</div>
+                                    {% endif %}
+                                    <span style="font-size: 0.85rem; color: var(--text-dim);">{{ service.status }}</span>
+                                </div>
+                            </div>
+                            <div class="status-badge {{ service.class }}">
+                                {{ 'Operational' if service.class == 'good' else 'Alert' }}
+                            </div>
+                        </div>
+
+                        <div class="message-feed">
+                            {% if service.feed %}
+                                {% for item in service.feed %}
+                                <div class="feed-item">
+                                    <span class="feed-time">[{{ item.time }}]</span>
+                                    <span class="feed-text">{{ item.text }}</span>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="empty-feed">No Active Alerts</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
-            </div>
-            {% endfor %}
-        </div>
+            </div> 
+
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <span>Live Stream</span>
+                    <h3>Incoming Tickets</h3>
+                </div>
+
+                <div class="ticket-list">
+                    {% for ticket in ticket_feed.tickets %}
+                    <div class="ticket-card">
+                        <span class="ticket-id">{{ ticket.id }} <span style="float:right; color: var(--text-dim); font-weight:normal;">{{ ticket.time }}</span></span>
+                        <span class="ticket-summary">{{ ticket.summary }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="placeholder-overlay">
+                    <span class="coming-soon-badge">COMING SOON</span>
+                    <p style="font-size: 0.85rem; color: var(--text-dim); margin: 0;">
+                        Jira API Integration is currently under development.
+                    </p>
+                </div>
+            </aside>
+
+        </div> 
     </div>
 </body>
 </html>
