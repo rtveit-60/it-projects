@@ -1,14 +1,25 @@
+# .gitignore for Service Status Page Dashboard
+
 # Python bytecode (prevents compiled files from bloating the repo)
 __pycache__/
 *.py[cod]
+*.pyc
+*.pyo
+*.pyd  
 *$py.class
 
 # Environment variables (CRITICAL: keeps sensitive keys/secrets out of Git)
 .env
 .venv
+.env.local
 env/
 venv/
+.venv/
 ENV/
+
+# IDE and editor settings
+.vscode/
+.idea/
 
 # Flask/Development specific
 instance/
@@ -18,3 +29,4 @@ instance/
 # OS generated files
 .DS_Store
 Thumbs.db
+
