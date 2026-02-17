@@ -43,6 +43,17 @@ ATLASSIAN_TARGETS = [
     }
 ]
 
+# --- GITHUB WATCHLIST ---
+GITHUB_WATCHLIST = [
+    "Git Operations",
+    "API Requests",
+    "Actions",
+    "Pull Requests",
+    "Issues",
+    "Copilot",
+    "Pages"
+]
+
 # --- MOCK TICKET DATA ---
 RAW_TICKETS = [
     {

@@ -5,48 +5,73 @@ from flask import Flask, render_template
 from requests.auth import HTTPBasicAuth
 
 # Import configuration from data.py
-from data import ADMIN_LINKS, RAW_TICKETS, ON_CALL_USER, MAINTENANCE_INFO, ATLASSIAN_TARGETS
+# ADDED: GITHUB_WATCHLIST to the imports
+from data import ADMIN_LINKS, RAW_TICKETS, ON_CALL_USER, MAINTENANCE_INFO, ATLASSIAN_TARGETS, GITHUB_WATCHLIST
 
 app = Flask(__name__)
 
 # --- JIRA CONFIGURATION ---
-LIVE_JIRA = False # Toggle to True for production
+LIVE_JIRA = False 
 JIRA_DOMAIN = "your-domain.atlassian.net"
 JIRA_EMAIL = "your-email@company.com"
 JIRA_API_TOKEN = "your-token"
 JIRA_PROJECT_KEY = "IT"
 
-# Visual priority for the service tiles
 SERVICE_ORDER = ["GitHub", "Atlassian", "AWS EC2", "AWS S3", "AWS Lambda"]
 
 def get_jira_tickets():
-    """Fetches tickets; fallback to data.py if API is disabled/fails."""
     if not LIVE_JIRA: return RAW_TICKETS
-    # (Actual Jira API request logic goes here)
     return RAW_TICKETS
 
 def get_health_data():
-    """Aggregates all vendor statuses with unified class mapping."""
     results = []
     
-    # GITHUB SCANNER
+    # --- 1. GITHUB MULTI-COMPONENT SCANNER ---
     try:
+        # We fetch the full summary which includes all components
         gh_resp = requests.get("https://www.githubstatus.com/api/v2/summary.json", timeout=3)
         gh_data = gh_resp.json()
-        indicator = gh_data.get('status', {}).get('indicator', 'none')
+        
+        # Default 'Good' State
+        gh_status = "All Systems Operational"
+        gh_class = "good"
+        gh_tags = []
+        
+        # Scan specifically for components in our Watchlist
+        for component in gh_data.get('components', []):
+            if component['name'] in GITHUB_WATCHLIST and component['status'] != 'operational':
+                gh_tags.append(component['name'])
+                
+                # Determine Severity
+                if component['status'] == 'major_outage':
+                    gh_class = 'critical'
+                    gh_status = "Major Outage"
+                elif component['status'] == 'partial_outage' and gh_class != 'critical':
+                    gh_class = 'warning'
+                    gh_status = "Partial Outage"
+                elif component['status'] == 'degraded_performance' and gh_class != 'critical':
+                    gh_class = 'warning'
+                    gh_status = "Degraded"
+
+        # Fallback: If a watched component isn't listed but the global flag is red
+        if not gh_tags and gh_data.get('status', {}).get('indicator') != 'none':
+             gh_status = gh_data.get('status', {}).get('description')
+             gh_class = "warning"
+             gh_tags = ["Global Issue"]
+
         results.append({
             "name": "GitHub",
-            "status": gh_data.get('status', {}).get('description'),
-            "class": "good" if indicator == "none" else ("critical" if indicator in ['major', 'critical'] else "warning"),
+            "status": gh_status,
+            "class": gh_class,
             "logo": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
             "url": "https://www.githubstatus.com",
             "feed": [{"time": i['created_at'][11:16], "text": i['name']} for i in gh_data.get('incidents', [])[:3]],
-            "tag": "Global"
+            "tag": gh_tags if gh_tags else "Global"
         })
     except:
-        results.append({"name": "GitHub", "status": "Offline", "class": "critical", "tag": "ERROR"})
+        results.append({"name": "GitHub", "status": "API Error", "class": "critical", "tag": "ERROR"})
 
-    # AWS SCANNER (RSS)
+    # --- 2. AWS SCANNER (RSS) ---
     aws_map = {"EC2": "ec2-us-east-1", "S3": "s3-us-east-1", "Lambda": "lambda-us-east-1"}
     for name, slug in aws_map.items():
         try:
@@ -68,7 +93,7 @@ def get_health_data():
             })
         except: continue
 
-    # ATLASSIAN MULTI-SCANNER
+    # --- 3. ATLASSIAN MULTI-SCANNER ---
     atl_status = {"status": "Operational", "class": "good", "tags": [], "feed": []}
     for target in ATLASSIAN_TARGETS:
         try:
