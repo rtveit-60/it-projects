@@ -5,6 +5,7 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # 3. Prevent Python from writing .pyc files and enable unbuffered logging
+# This ensures you see your 'Jamf Error' or 'Intune Error' prints in real-time.
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
@@ -12,6 +13,7 @@ ENV PYTHONUNBUFFERED=1
 COPY requirements.txt .
 
 # 5. Install dependencies
+# We use --no-cache-dir to keep the image as small as possible
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 6. Copy the rest of your application code
@@ -21,5 +23,5 @@ COPY . .
 EXPOSE 5000
 
 # 8. Start the application using Waitress (Production Grade)
-# We point to 'app' (the Flask instance) inside 'app.py'
+# This replaces 'flask run' with a robust, multi-threaded server.
 CMD ["python", "-c", "from waitress import serve; from app import app; serve(app, host='0.0.0.0', port=5000)"]

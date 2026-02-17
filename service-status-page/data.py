@@ -93,3 +93,10 @@ RAW_TICKETS = [
     {"id": "INC-1012", "summary": "Conf Room B AV Offline", "description": "HDMI switcher power cycle.", "status": "Pending", "assigned_to": "Jordan Smith", "time": "08:10"},
     {"id": "INC-1014", "summary": "MFA Loop on EntraID", "description": "Verification loop after reset.", "status": "Waiting for Support", "assigned_to": "Unassigned", "time": "07:30"}
 ]
+
+# --- MICROSOFT RSS TARGETS ---
+MS_RSS_TARGETS = [
+    {"name": "Microsoft 365", "url": "https://status.office.com/en-us/rss", "logo": "https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg"},
+    {"name": "Microsoft Teams", "url": "https://status.office.com/en-us/rss", "logo": "https://upload.wikimedia.org/wikipedia/commons/c/c9/Microsoft_Office_Teams_%282018%E2%80%93present%29.svg"},
+    {"name": "Azure Status", "url": "https://azurestatus.microsoft.com/en-us/status/feed/", "logo": "https://upload.wikimedia.org/wikipedia/commons/a/a8/Microsoft_Azure_Logo.svg"}
+]
